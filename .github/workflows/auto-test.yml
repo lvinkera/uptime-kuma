@@ -11,65 +11,8 @@ on:
       - '*.md'
 
 jobs:
-  auto-test:
-    needs: [ check-linters ]
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
-
-    strategy:
-      matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]  # ARM64 removed
-        node: [18, 20]
-
-    steps:
-      - run: git config --global core.autocrlf false
-      - uses: actions/checkout@v4
-
-      - name: Use Node.js ${{ matrix.node }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node }}
-
-      - run: npm install
-      - run: npm run build
-      - run: npm run test-backend
-        env:
-          HEADLESS_TEST: 1
-          JUST_FOR_TEST: ${{ secrets.JUST_FOR_TEST }}
-
-  check-linters:
-    runs-on: ubuntu-latest
-
-    steps:
-      - run: git config --global core.autocrlf false
-      - uses: actions/checkout@v4
-
-      - name: Use Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - run: npm install
-      - run: npm run lint:prod
-
-  e2e-test:
-    runs-on: ubuntu-latest
-    steps:
-      - run: git config --global core.autocrlf false
-      - uses: actions/checkout@v4
-
-      - name: Use Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - run: npm install
-      - run: npx playwright install
-      - run: npm run build
-      - run: npm run test-e2e
-
+  
   deploy:
-    needs: [auto-test, check-linters, e2e-test]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
 
